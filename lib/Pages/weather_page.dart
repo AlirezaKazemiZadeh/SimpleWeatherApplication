@@ -266,7 +266,8 @@ class _WeatherPageState extends State<WeatherPage> {
                     //   _saveWeatherDataToHive();
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const datapage()),
+                      MaterialPageRoute(
+                          builder: (context) => const SecondPage()),
                     );
                   },
                   child: const Text('ذخیره اطلاعات'),

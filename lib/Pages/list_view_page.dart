@@ -1,8 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_application_2/Locations/Iran_Ardabil.dart';
 import 'package:flutter_application_2/Locations/Iran_Bushehr.dart';
 import 'package:flutter_application_2/Locations/Iran_Gilan.dart';
@@ -14,7 +11,6 @@ import 'package:flutter_application_2/Locations/Iran_Isfahan.dart';
 import 'package:flutter_application_2/Locations/Iran_Mazandaran.dart';
 import 'package:flutter_application_2/Locations/Iran_Shiraz.dart';
 import 'package:flutter_application_2/Locations/Iran_Yazd.dart';
-import 'package:flutter_application_2/Pages/login_or_register_page.dart';
 import 'package:flutter_application_2/Pages/weather_page.dart';
 
 import '../Locations/Iran_Alborz.dart';
@@ -154,26 +150,26 @@ class _ListViewPageState extends State<ListViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 240, 242),
+      backgroundColor: const Color.fromARGB(255, 240, 240, 242),
       appBar: AppBar(
         actions: [
           IconButton(
               onPressed: signUserOut,
-              icon: Icon(
+              icon: const Icon(
                 Icons.logout,
                 color: Colors.white,
               )),
         ],
-        title: Text('استان مورد نظر را انتخاب کنید'),
+        title: const Text('استان مورد نظر را انتخاب کنید'),
         centerTitle: true,
-        backgroundColor: Color.fromARGB(255, 104, 166, 169),
-        titleTextStyle: TextStyle(
+        backgroundColor: const Color.fromARGB(255, 104, 166, 169),
+        titleTextStyle: const TextStyle(
             fontFamily: 'Vazir',
             fontWeight: FontWeight.bold,
             fontSize: 16,
             color: Colors.white),
         automaticallyImplyLeading: false,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(25),
           bottomRight: Radius.circular(25),
@@ -183,8 +179,8 @@ class _ListViewPageState extends State<ListViewPage> {
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         // color: Color.fromARGB(255, 221, 244, 255),
-        margin: EdgeInsetsDirectional.all(10),
-        color: Color.fromARGB(255, 240, 240, 242),
+        margin: const EdgeInsetsDirectional.all(10),
+        color: const Color.fromARGB(255, 240, 240, 242),
         child: ReorderableListView(
           children: [
             for (final tile in cityImages)
@@ -205,13 +201,13 @@ class _ListViewPageState extends State<ListViewPage> {
                 ),
                 //isThreeLine: true,
 
-                shape: OutlineInputBorder(
+                shape: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(15)),
                     borderSide:
                         BorderSide(color: Color.fromARGB(255, 255, 255, 255))),
-                contentPadding: EdgeInsets.all(10),
-                subtitle: Text('Iran'),
-                tileColor: Color.fromARGB(255, 146, 173, 199),
+                contentPadding: const EdgeInsets.all(10),
+                subtitle: const Text('Iran'),
+                tileColor: const Color.fromARGB(255, 146, 173, 199),
                 trailing: const Icon(
                   Icons.arrow_forward_ios,
                   color: Color.fromARGB(255, 13, 15, 68),
@@ -221,7 +217,8 @@ class _ListViewPageState extends State<ListViewPage> {
                   if (tile.cityName == 'تهران') {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => WeatherPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const WeatherPage()),
                     );
                   }
                   if (tile.cityName == 'اصفهان') {

@@ -1,9 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/Pages/home_page.dart';
 import 'package:flutter_application_2/Pages/login_or_register_page.dart';
-import 'package:flutter_application_2/Pages/login_page.dart';
-import 'package:flutter_application_2/Pages/weather_page.dart';
 
 import 'list_view_page.dart';
 
@@ -18,12 +15,12 @@ class AuthPage extends StatelessWidget {
         builder: (context, snapshot) {
           // user is logged in
           if (snapshot.hasData) {
-            return ListViewPage();
+            return const ListViewPage();
           }
 
           //user is not logged in
           else {
-            return LoginOrRegisterPage();
+            return const LoginOrRegisterPage();
           }
         },
       ),

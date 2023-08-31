@@ -1,10 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -22,12 +20,12 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(actions: [
-        IconButton(onPressed: SingUserOut, icon: Icon(Icons.logout))
+        IconButton(onPressed: SingUserOut, icon: const Icon(Icons.logout))
       ]),
       body: Center(
           child: Text(
-        "وارد شدید با " + user.email!,
-        style: TextStyle(fontSize: 20),
+        "وارد شدید با ${user.email!}",
+        style: const TextStyle(fontSize: 20),
       )),
     );
   }
