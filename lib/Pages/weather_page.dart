@@ -1,17 +1,19 @@
-import 'dart:math';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/Pages/home_page.dart';
-import 'package:flutter_application_2/Pages/list_view_page.dart';
+import 'package:flutter_application_2/Pages/data_page.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:lottie/lottie.dart';
 
 class WeatherPage extends StatefulWidget {
+  static const API_key = '5360942d4f43add177f84f37183adf4d';
+
+  const WeatherPage({super.key});
   @override
   State<WeatherPage> createState() => _WeatherPageState();
 }
@@ -41,24 +43,75 @@ class _WeatherPageState extends State<WeatherPage> {
   var humidity;
   var windspeed;
 
-  Future<void> getWeather() async {
-    Uri url = Uri.parse(
-        'https://api.openweathermap.org/data/2.5/weather?q=Tehran&units=metric&appid=5360942d4f43add177f84f37183adf4d');
-    http.Response response = await http.get(url);
-    var result = jsonDecode(response.body);
-    setState(() {
-      this.temp = result['main']['temp'];
-      this.discription = result['weather'][0]['description'];
-      this.currently = result['weather'][0]['main'];
-      this.humidity = result['main']['humidity'];
-      this.windspeed = result['wind']['speed'];
-    });
+  Future<bool> _checkInternetConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;
+  }
+
+  Future<void> _fetchAndSaveWeatherData() async {
+    try {
+      Uri url = Uri.parse(
+          'https://api.openweathermap.org/data/2.5/weather?q=Tehran&units=metric&appid=${WeatherPage.API_key}');
+      http.Response response = await http.get(url);
+      if (response.statusCode == 200) {
+        var result = jsonDecode(response.body);
+        setState(() {
+          temp = result['main']['temp'];
+          discription = result['weather'][0]['description'];
+          currently = result['weather'][0]['main'];
+          humidity = result['main']['humidity'];
+          windspeed = result['wind']['speed'];
+        });
+        await _saveWeatherDataToHive();
+      } else {
+        await _loadWeatherDataFromHive();
+      }
+    } catch (e) {
+      await _loadWeatherDataFromHive();
+    }
+  }
+
+  Future<void> _saveWeatherDataToHive() async {
+    final weatherBox = Hive.box('weatherBox');
+    var weatherData = {
+      'temp': temp,
+      'description': discription,
+      'currently': currently,
+      'humidity': humidity,
+      'windspeed': windspeed,
+    };
+    await weatherBox.put('weatherData', weatherData);
+  }
+
+  Future<void> _loadWeatherDataFromHive() async {
+    final weatherBox = Hive.box('weatherBox');
+    var weatherData = weatherBox.get('weatherData');
+    if (weatherData != null) {
+      setState(() {
+        temp = weatherData['temp'];
+        discription = weatherData['description'];
+        currently = weatherData['currently'];
+        humidity = weatherData['humidity'];
+        windspeed = weatherData['windspeed'];
+      });
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    getWeather();
+    // getWeather();
+    _initializeData();
+  }
+
+  void _initializeData() async {
+    bool hasInternetConnection = await _checkInternetConnection();
+
+    if (hasInternetConnection) {
+      await _fetchAndSaveWeatherData();
+    } else {
+      await _loadWeatherDataFromHive();
+    }
   }
 
   Widget _getWeatherImage(String? currently) {
@@ -117,7 +170,7 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 221, 244, 255),
+      backgroundColor: const Color.fromARGB(255, 221, 244, 255),
       body: Column(
         children: [
           Stack(
@@ -125,7 +178,7 @@ class _WeatherPageState extends State<WeatherPage> {
               Container(
                 height: MediaQuery.of(context).size.height / 3,
                 width: MediaQuery.of(context).size.width,
-                color: Color.fromARGB(255, 62, 213, 226),
+                color: const Color.fromARGB(255, 62, 213, 226),
                 child: SingleChildScrollView(
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -146,9 +199,7 @@ class _WeatherPageState extends State<WeatherPage> {
                           ),
                         ),
                         Text(
-                          temp != null
-                              ? temp.toString() + "\u00B0"
-                              : "در حال بارگذاری",
+                          temp != null ? "$temp\u00B0" : "در حال بارگذاری",
                           style: const TextStyle(
                             color: Colors.black87,
                             fontSize: 20,
@@ -156,10 +207,10 @@ class _WeatherPageState extends State<WeatherPage> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: 10),
+                          padding: const EdgeInsets.only(top: 10),
                           child: currently != null
                               ? _getWeatherImage(currently)
-                              : Text("در حال بارگذاری"),
+                              : const Text("در حال بارگذاری"),
                         ),
                       ]),
                 ),
@@ -168,22 +219,21 @@ class _WeatherPageState extends State<WeatherPage> {
           ),
           Expanded(
               child: Padding(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             child: ListView(
               children: [
                 ListTile(
                   leading: const FaIcon(FontAwesomeIcons.thermometerHalf),
-                  title: Text(
+                  title: const Text(
                     "Tempreture:",
                     style: TextStyle(),
                   ),
-                  trailing: Text(temp != null
-                      ? temp.toString() + "\u00B0"
-                      : "در حال بارگذاری"),
+                  trailing:
+                      Text(temp != null ? "$temp\u00B0" : "در حال بارگذاری"),
                 ),
                 ListTile(
-                  leading: FaIcon(FontAwesomeIcons.cloud),
-                  title: Text(
+                  leading: const FaIcon(FontAwesomeIcons.cloud),
+                  title: const Text(
                     "Weather:",
                     style: TextStyle(),
                   ),
@@ -192,8 +242,8 @@ class _WeatherPageState extends State<WeatherPage> {
                       : "در حال بارگذاری"),
                 ),
                 ListTile(
-                  leading: FaIcon(FontAwesomeIcons.sun),
-                  title: Text(
+                  leading: const FaIcon(FontAwesomeIcons.sun),
+                  title: const Text(
                     "temperature humidity:",
                     style: TextStyle(),
                   ),
@@ -202,14 +252,24 @@ class _WeatherPageState extends State<WeatherPage> {
                       : "در حال بارگذاری"),
                 ),
                 ListTile(
-                  leading: FaIcon(FontAwesomeIcons.wind),
-                  title: Text(
+                  leading: const FaIcon(FontAwesomeIcons.wind),
+                  title: const Text(
                     "Wind Speed:",
                     style: TextStyle(),
                   ),
                   trailing: Text(windspeed != null
                       ? windspeed.toString()
                       : "در حال بارگذاری"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    //   _saveWeatherDataToHive();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const datapage()),
+                    );
+                  },
+                  child: const Text('ذخیره اطلاعات'),
                 ),
               ],
             ),
@@ -227,15 +287,16 @@ class _WeatherPageState extends State<WeatherPage> {
             //  SIngOutCheck = 0;
           }
           if (index == 1) {
-            getWeather();
+            //  getWeather();
+            _initializeData();
             //  SIngOutCheck = 0;
             Fluttertoast.showToast(
                 msg: "بارگذاری اطلاعات جدید..",
                 toastLength: Toast.LENGTH_SHORT,
                 gravity: ToastGravity.SNACKBAR,
                 timeInSecForIosWeb: 1,
-                backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                textColor: Color.fromARGB(255, 0, 0, 0),
+                backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                textColor: const Color.fromARGB(255, 0, 0, 0),
                 fontSize: 16.0);
           }
         },
